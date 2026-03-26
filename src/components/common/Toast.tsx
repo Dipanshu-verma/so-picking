@@ -2,23 +2,21 @@
 
 import { Toaster } from "react-hot-toast";
 
-// Centralised toast configuration used across all pages.
-// Import <AppToaster /> once per layout instead of
-// repeating <Toaster ... /> config in every page file.
 export function AppToaster() {
   return (
     <Toaster
       position="top-center"
       reverseOrder={false}
-      gutter={8}
+      gutter={10}
       toastOptions={{
         duration: 3000,
         style: {
           fontSize: "15px",
-          fontWeight: "500",
-          borderRadius: "12px",
-          padding: "12px 16px",
-          maxWidth: "360px",
+          fontWeight: "600",
+          borderRadius: "16px",
+          padding: "14px 18px",
+          maxWidth: "380px",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08)",
         },
         success: {
           style: {

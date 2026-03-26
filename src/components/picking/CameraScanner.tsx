@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, CameraOff } from "lucide-react";
+import { X, CameraOff, ScanLine } from "lucide-react";
 import { sanitizeBarcode } from "@/lib/utils";
 
 interface CameraScannerProps {
@@ -15,12 +15,10 @@ export function CameraScanner({ onScan, onClose }: CameraScannerProps) {
   const scannerRef = useRef<{ stop: () => Promise<void> } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(true);
-  // Prevent onScan firing multiple times after first successful scan
   const hasScannedRef = useRef(false);
 
  useEffect(() => {
   let isMounted = true;
-  // Track whether stop() has already been called to prevent double-stop
   const isStoppedRef = { current: false };
 
   const stopScanner = async () => {
@@ -70,7 +68,6 @@ export function CameraScanner({ onScan, onClose }: CameraScannerProps) {
           const clean = sanitizeBarcode(decodedText);
           if (clean.length >= 3) {
             hasScannedRef.current = true;
-            // Stop first, then fire callback
             stopScanner().then(() => {
               if (isMounted) onScan(clean);
             });
@@ -108,13 +105,21 @@ export function CameraScanner({ onScan, onClose }: CameraScannerProps) {
 }, [onScan]);
 
   return (
-    <div className="relative rounded-xl overflow-hidden border-2 border-blue-300 bg-black">
+    <div
+      className="relative rounded-2xl overflow-hidden border-2"
+      style={{
+        borderColor: "#2563eb",
+        boxShadow: "0 0 0 4px rgba(37,99,235,0.12), 0 4px 20px rgba(0,0,0,0.2)",
+        background: "#000",
+      }}
+    >
       {/* Close button */}
       <button
         onClick={onClose}
         aria-label="Close camera scanner"
-        className="absolute top-2 right-2 z-20 w-9 h-9 rounded-full bg-black/60
-                   flex items-center justify-center hover:bg-black/80 transition-colors"
+        className="absolute top-3 right-3 z-20 w-10 h-10 rounded-full flex items-center
+                   justify-center transition-colors active:scale-95"
+        style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
       >
         <X className="w-5 h-5 text-white" aria-hidden="true" />
       </button>
@@ -122,30 +127,39 @@ export function CameraScanner({ onScan, onClose }: CameraScannerProps) {
       {/* Starting indicator */}
       {isStarting && !error && (
         <div className="absolute inset-0 z-10 flex flex-col items-center
-                        justify-center gap-2 bg-black">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white
-                          rounded-full animate-spin" />
-          <p className="text-white/70 text-sm">Starting camera...</p>
+                        justify-center gap-3 bg-black">
+          <div
+            className="w-10 h-10 rounded-full border-2"
+            style={{
+              borderColor: "rgba(255,255,255,0.15)",
+              borderTopColor: "#fff",
+              animation: "spin 0.8s linear infinite",
+            }}
+          />
+          <p className="text-white/70 text-sm font-medium">Starting camera...</p>
         </div>
       )}
 
       {/* Error state */}
       {error && (
-        <div className="flex flex-col items-center justify-center gap-3
-                        py-10 px-6 bg-black min-h-[180px]">
-          <CameraOff className="w-10 h-10 text-red-400" aria-hidden="true" />
-          <p className="text-white/80 text-sm text-center">{error}</p>
+        <div className="flex flex-col items-center justify-center gap-4
+                        py-12 px-6 bg-black min-h-[200px]">
+          <div className="w-14 h-14 rounded-2xl bg-red-900/30 flex items-center justify-center">
+            <CameraOff className="w-7 h-7 text-red-400" aria-hidden="true" />
+          </div>
+          <p className="text-white/80 text-sm text-center leading-relaxed">{error}</p>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-white/10 text-white
-                       text-sm font-medium hover:bg-white/20 transition-colors"
+            className="px-5 py-2.5 rounded-xl font-semibold text-sm text-white
+                       transition-colors"
+            style={{ background: "rgba(255,255,255,0.12)" }}
           >
             Close
           </button>
         </div>
       )}
 
-      {/* Scan viewport — html5-qrcode renders into this div */}
+      {/* Scan viewport */}
       <div
         id={SCANNER_ELEMENT_ID}
         className={`w-full ${error ? "hidden" : ""}`}
@@ -153,9 +167,12 @@ export function CameraScanner({ onScan, onClose }: CameraScannerProps) {
 
       {/* Scan guide overlay */}
       {!isStarting && !error && (
-        <div className="absolute bottom-0 left-0 right-0 z-10 py-2
-                        bg-gradient-to-t from-black/60 to-transparent">
-          <p className="text-center text-white/80 text-xs font-medium">
+        <div className="absolute bottom-0 left-0 right-0 z-10 py-3
+                        flex flex-col items-center gap-1"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.7), transparent)" }}
+        >
+          <ScanLine className="w-5 h-5 text-blue-400" aria-hidden="true" />
+          <p className="text-center text-white/80 text-xs font-semibold">
             Point at the barcode
           </p>
         </div>

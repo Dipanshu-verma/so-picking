@@ -72,37 +72,65 @@ export function generateSyncId(soId: string): string {
 }
 
 // ─────────────────────────────────────────────
-// Sound feedback (success / error)
+// Sound feedback (success / error / chime)
 // ─────────────────────────────────────────────
-export function playSound(type: "success" | "error"): void {
+export function playSound(type: "success" | "error" | "chime"): void {
   if (typeof window === "undefined") return;
 
   try {
     const AudioContext =
-      window.AudioContext || (window as unknown as { webkitAudioContext: typeof window.AudioContext }).webkitAudioContext;
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof window.AudioContext })
+        .webkitAudioContext;
     if (!AudioContext) return;
 
     const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    if (type === "chime") {
+      // Success chime — two ascending tones
+      [880, 1100].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = "sine";
+        const startTime = ctx.currentTime + i * 0.15;
+        gain.gain.setValueAtTime(0.3, startTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.2);
+        osc.start(startTime);
+        osc.stop(startTime + 0.2);
+      });
+      return;
+    }
 
-    oscillator.frequency.value =
-      type === "success"
-        ? SOUND_CONFIG.SUCCESS_FREQUENCY
-        : SOUND_CONFIG.ERROR_FREQUENCY;
-    oscillator.type = "sine";
+    if (type === "error") {
+      // Error tone — descending harsh tone
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(400, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.3);
+      osc.type = "sawtooth";
+      gain.gain.setValueAtTime(0.4, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.3);
+      return;
+    }
 
-    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.001,
-      ctx.currentTime + SOUND_CONFIG.DURATION_MS / 1000
-    );
-
-    oscillator.start(ctx.currentTime);
-    oscillator.stop(ctx.currentTime + SOUND_CONFIG.DURATION_MS / 1000);
+    // Success — short clean beep
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    osc.type = "sine";
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
   } catch {
     // Silently fail — sound is optional
   }

@@ -11,10 +11,13 @@ import { playSound, vibrate } from "@/lib/utils";
 import type { PickingError, ErrorQueueItem } from "@/types/errors";
 import type { LocationGroup, PickingStats } from "@/types/picking";
 
+export type FlashType = "success" | "error" | null;
+
 interface UsePickingFlowReturn {
   currentLocation: LocationGroup | null;
   currentStep: PickingStep;
   isAllDone: boolean;
+  flashType: FlashType;
   // Pallet
   palletMismatchVisible: boolean;
   handlePalletScan: (value: string) => void;
@@ -56,8 +59,14 @@ export function usePickingFlow(): UsePickingFlowReturn {
   const [palletMismatchVisible, setPalletMismatchVisible] = useState(false);
   const [errorModalVisible, setErrorModalVisible] = useState(false);
   const [errorPreselected, setErrorPreselected] = useState<ErrorType | undefined>(undefined);
+  const [flashType, setFlashType] = useState<FlashType>(null);
 
-  // Derived: current location from active SO + current index
+  // Flash the screen for 600ms then clear
+  const triggerFlash = useCallback((type: "success" | "error") => {
+    setFlashType(type);
+    setTimeout(() => setFlashType(null), 600);
+  }, []);
+
   const currentLocation: LocationGroup | null =
     activeSO && activeSO.currentLocationIndex < activeSO.locations.length
       ? activeSO.locations[activeSO.currentLocationIndex]
@@ -71,7 +80,6 @@ export function usePickingFlow(): UsePickingFlowReturn {
       ? compareBarcode(scannedSKU, currentLocation.sku)
       : false;
 
-  // ── Persist progress to IndexedDB ─────────────────────────────────
   const saveProgress = useCallback(async () => {
     const progress = getProgress();
     if (!progress) return;
@@ -87,15 +95,17 @@ export function usePickingFlow(): UsePickingFlowReturn {
       const isMatch = compareBarcode(value, currentLocation.tag);
       if (isMatch) {
         playSound("success");
-        vibrate(100);
+        vibrate(100);               // Short single vibration — correct scan
+        triggerFlash("success");    // Green flash
         setCurrentStep(PickingStep.SKU_SCREEN);
       } else {
         playSound("error");
-        vibrate([200, 100, 200]);
+        vibrate([200, 100, 200]);   // Triple long vibration — wrong scan
+        triggerFlash("error");      // Red flash
         setPalletMismatchVisible(true);
       }
     },
-    [currentLocation, setCurrentStep]
+    [currentLocation, setCurrentStep, triggerFlash]
   );
 
   const handlePalletMismatchRetry = useCallback(() => {
@@ -116,26 +126,29 @@ export function usePickingFlow(): UsePickingFlowReturn {
       const isMatch = compareBarcode(value, currentLocation.sku);
       if (isMatch) {
         playSound("success");
-        vibrate(100);
+        vibrate(100);               // Short single vibration — correct scan
+        triggerFlash("success");    // Green flash
         setScannedSKU(value);
       } else {
         playSound("error");
-        vibrate([200, 100, 200]);
+        vibrate([200, 100, 200]);   // Triple long vibration — wrong scan
+        triggerFlash("error");      // Red flash
         setScannedSKU(null);
       }
     },
-    [currentLocation, setScannedSKU]
+    [currentLocation, setScannedSKU, triggerFlash]
   );
 
   // ── PICKED ────────────────────────────────────────────────────────
   const handlePicked = useCallback(async () => {
     if (!currentLocation || !activeSO) return;
     markLocationCompleted(currentLocation.location);
-    playSound("success");
-    vibrate(200);
+    playSound("chime");             // Success chime — location complete
+    vibrate(200);                   // Single long vibration — location done
+    triggerFlash("success");
     await saveProgress();
     moveToNextLocation();
-  }, [currentLocation, activeSO, markLocationCompleted, saveProgress, moveToNextLocation]);
+  }, [currentLocation, activeSO, markLocationCompleted, saveProgress, moveToNextLocation, triggerFlash]);
 
   // ── ERROR FLOW ────────────────────────────────────────────────────
   const handleOpenError = useCallback(() => {
@@ -164,10 +177,8 @@ export function usePickingFlow(): UsePickingFlowReturn {
         syncStatus: SyncStatus.PENDING,
       };
 
-      // 1. Add to Zustand in-memory store
       addError(error);
 
-      // 2. Persist to IndexedDB for offline durability
       const queueItem: ErrorQueueItem = {
         id: error.id,
         soId: activeSO.soId,
@@ -183,6 +194,8 @@ export function usePickingFlow(): UsePickingFlowReturn {
 
       markLocationError(currentLocation.location);
       playSound("error");
+      vibrate([200, 100, 200]);     // Triple vibration — error submitted
+      triggerFlash("error");
 
       setErrorModalVisible(false);
       setErrorPreselected(undefined);
@@ -190,13 +203,14 @@ export function usePickingFlow(): UsePickingFlowReturn {
       await saveProgress();
       moveToNextLocation();
     },
-    [currentLocation, activeSO, addError, markLocationError, saveProgress, moveToNextLocation]
+    [currentLocation, activeSO, addError, markLocationError, saveProgress, moveToNextLocation, triggerFlash]
   );
 
   return {
     currentLocation,
     currentStep,
     isAllDone: allDone,
+    flashType,
     palletMismatchVisible,
     handlePalletScan,
     handlePalletMismatchRetry,

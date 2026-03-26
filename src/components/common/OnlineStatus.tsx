@@ -28,10 +28,11 @@ export function OnlineStatus() {
       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
                   transition-all duration-300 ${
                     isOnline
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
+                      ? "bg-green-50 text-green-700 border border-green-200"
+                      : "bg-red-50 text-red-700 border border-red-200"
                   }`}
     >
+      <span className={isOnline ? "online-dot" : "offline-dot"} aria-hidden="true" />
       {isOnline ? (
         <Wifi className="w-3.5 h-3.5" aria-hidden="true" />
       ) : (

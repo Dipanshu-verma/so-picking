@@ -13,7 +13,6 @@ export function SOSearch({ value, onChange, debounceMs = 300 }: SOSearchProps) {
   const [localValue, setLocalValue] = useState(value);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync external value changes into local state
   useEffect(() => {
     setLocalValue(value);
   }, [value]);
@@ -42,10 +41,10 @@ export function SOSearch({ value, onChange, debounceMs = 300 }: SOSearchProps) {
 
   return (
     <div className="relative">
-      <Search
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-        aria-hidden="true"
-      />
+      {/* Search icon */}
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
+        <Search className="w-5 h-5 text-slate-400" aria-hidden="true" />
+      </div>
 
       <input
         type="search"
@@ -54,20 +53,24 @@ export function SOSearch({ value, onChange, debounceMs = 300 }: SOSearchProps) {
         placeholder="Search Sales Order..."
         autoComplete="off"
         aria-label="Search Sales Orders"
-        className="w-full pl-12 pr-12 py-4 text-base bg-white border-2 border-gray-200 
-                   rounded-xl outline-none transition-colors duration-150
-                   focus:border-blue-500 focus:ring-2 focus:ring-blue-100
-                   placeholder-gray-400 text-gray-900"
+        className="w-full pl-12 pr-12 py-4 text-base font-medium bg-white
+                   border-2 border-slate-200 rounded-2xl outline-none
+                   transition-all duration-200 text-slate-900
+                   placeholder:text-slate-400 placeholder:font-normal
+                   focus:border-blue-500 focus:ring-4 focus:ring-blue-50
+                   shadow-sm hover:border-slate-300"
+        style={{ minHeight: "56px" }}
       />
 
       {localValue && (
         <button
           onClick={handleClear}
           aria-label="Clear search"
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center 
-                     justify-center rounded-full hover:bg-gray-100 transition-colors"
+          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center
+                     justify-center rounded-full bg-slate-100 hover:bg-slate-200
+                     transition-colors active:scale-95"
         >
-          <X className="w-4 h-4 text-gray-500" />
+          <X className="w-4 h-4 text-slate-500" />
         </button>
       )}
     </div>

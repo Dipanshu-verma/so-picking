@@ -5,7 +5,7 @@ import { APP_META } from "@/constants";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { AppToaster } from "@/components/common/Toast";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800", "900"] });
 
 export const metadata: Metadata = {
   title: APP_META.NAME,

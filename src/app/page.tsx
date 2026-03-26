@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { RefreshCw, PackageSearch, WifiOff } from "lucide-react";
+import { RefreshCw, PackageSearch, WifiOff, Package2 } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { SOSearch } from "@/components/so-list/SOSearch";
 import { SOCard } from "@/components/so-list/SOCard";
@@ -11,6 +11,7 @@ import { useSOList } from "@/hooks/useSOList";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { usePickingStore } from "@/store/picking-store";
+
 export default function HomePage() {
   const {
     filteredList,
@@ -24,106 +25,122 @@ export default function HomePage() {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  // Virtual list — only renders visible items when list > 100
   const virtualizer = useVirtualizer({
     count: filteredList.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 112, // Approximate height of each SOCard in px
-    overscan: 5,             // Render 5 extra items above/below viewport
+    estimateSize: () => 112,
+    overscan: 5,
   });
 
   const useVirtual = filteredList.length > 100;
 
   const router = useRouter();
-const activeSO = usePickingStore((s) => s.activeSO);
-const [hasHydrated, setHasHydrated] = useState(false);
+  const activeSO = usePickingStore((s) => s.activeSO);
+  const [hasHydrated, setHasHydrated] = useState(false);
 
-useEffect(() => {
-  const unsubscribe = usePickingStore.persist.onFinishHydration(() => {
-    setHasHydrated(true);
-  });
+  useEffect(() => {
+    const unsubscribe = usePickingStore.persist.onFinishHydration(() => {
+      setHasHydrated(true);
+    });
 
-  if (usePickingStore.persist.hasHydrated()) {
-    setHasHydrated(true);
-  }
+    if (usePickingStore.persist.hasHydrated()) {
+      setHasHydrated(true);
+    }
 
-  return () => unsubscribe();
-}, []);
+    return () => unsubscribe();
+  }, []);
 
-useEffect(() => {
-  if (!hasHydrated) return;
-  if (activeSO) {
-    // IN_PROGRESS order exists — land directly on picking page
-    router.replace(`/so/${encodeURIComponent(activeSO.soId)}/picking`);
-  }
-}, [hasHydrated, activeSO, router]);
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (activeSO) {
+      router.replace(`/so/${encodeURIComponent(activeSO.soId)}/picking`);
+    }
+  }, [hasHydrated, activeSO, router]);
 
-// Show nothing while checking for active SO to avoid flash of home screen
-if (!hasHydrated) return null;
-if (activeSO) return null;
-
+  if (!hasHydrated) return null;
+  if (activeSO) return null;
 
   return (
-    <div className="min-h-screen bg-warehouse-bg">
+    <div className="min-h-screen" style={{ background: "#f1f5f9" }}>
       <Header />
 
       <main className="max-w-2xl mx-auto px-4 pt-20 pb-8">
-        {/* Search */}
+
+        {/* ── Page title ─────────────────────────────────────────── */}
+        <div className="pt-4 pb-2">
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+            Sales Orders
+          </h2>
+          <p className="text-sm text-slate-500 mt-0.5">Select an order to begin picking</p>
+        </div>
+
+        {/* ── Search ─────────────────────────────────────────────── */}
         <div className="my-4">
           <SOSearch value={searchQuery} onChange={setSearchQuery} />
         </div>
 
-        {/* Offline cache notice */}
+        {/* ── Offline cache notice ────────────────────────────────── */}
         {isFromCache && (
           <div
-            className="mb-4 flex items-center gap-2 bg-amber-50 border border-amber-200
-                          rounded-xl px-4 py-3 text-amber-700 text-sm"
+            className="mb-4 flex items-center gap-3 rounded-2xl px-4 py-3 text-amber-800 text-sm
+                       border border-amber-200 fade-in"
+            style={{ background: "linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)" }}
           >
-            <WifiOff className="w-4 h-4 shrink-0" aria-hidden="true" />
-            <span>Showing cached data — connect to refresh.</span>
+            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center shrink-0">
+              <WifiOff className="w-4 h-4 text-amber-600" aria-hidden="true" />
+            </div>
+            <span className="flex-1 font-medium">Showing cached data — connect to refresh.</span>
             <button
               onClick={refetch}
-              className="ml-auto text-amber-700 underline text-sm font-medium"
+              className="text-amber-700 underline text-sm font-semibold hover:text-amber-900
+                         transition-colors shrink-0"
             >
               Refresh
             </button>
           </div>
         )}
 
-        {/* Loading */}
+        {/* ── Loading ─────────────────────────────────────────────── */}
         {isLoading && <SOListSkeleton count={5} />}
 
-        {/* Error */}
+        {/* ── Error ───────────────────────────────────────────────── */}
         {!isLoading && error && (
-          <div className="flex flex-col items-center py-16 gap-5">
-            <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
+          <div className="flex flex-col items-center py-16 gap-5 fade-in">
+            <div className="w-20 h-20 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center">
               <RefreshCw className="w-9 h-9 text-red-400" aria-hidden="true" />
             </div>
             <div className="text-center">
-              <p className="text-gray-800 font-semibold text-lg">
-                Failed to load
-              </p>
-              <p className="text-gray-500 mt-1 text-sm">{error}</p>
+              <p className="text-slate-800 font-bold text-xl">Failed to load</p>
+              <p className="text-slate-500 mt-1 text-sm">{error}</p>
             </div>
-            <button onClick={refetch} className="warehouse-button-primary px-10">
-              Retry
+            <button
+              onClick={refetch}
+              className="warehouse-button warehouse-button-primary px-10"
+            >
+              Try Again
             </button>
           </div>
         )}
 
-        {/* Empty */}
+        {/* ── Empty ───────────────────────────────────────────────── */}
         {!isLoading && !error && filteredList.length === 0 && (
-          <div className="flex flex-col items-center py-16 gap-5">
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center">
-              <PackageSearch className="w-9 h-9 text-gray-400" aria-hidden="true" />
+          <div className="flex flex-col items-center py-16 gap-5 fade-in">
+            <div
+              className="w-24 h-24 rounded-3xl flex items-center justify-center"
+              style={{
+                background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)",
+                boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+              }}
+            >
+              <PackageSearch className="w-11 h-11 text-slate-400" aria-hidden="true" />
             </div>
             <div className="text-center">
-              <p className="text-gray-700 font-semibold text-lg">
+              <p className="text-slate-800 font-bold text-xl">
                 {searchQuery.trim()
                   ? `No results for "${searchQuery}"`
                   : "No pending orders"}
               </p>
-              <p className="text-gray-400 mt-1 text-sm">
+              <p className="text-slate-500 mt-1.5 text-sm">
                 {searchQuery.trim()
                   ? "Try a different search term"
                   : "All orders are up to date"}
@@ -132,7 +149,7 @@ if (activeSO) return null;
             {searchQuery.trim() && (
               <button
                 onClick={() => setSearchQuery("")}
-                className="warehouse-button-secondary px-8"
+                className="warehouse-button warehouse-button-secondary px-8"
               >
                 Clear Search
               </button>
@@ -140,20 +157,21 @@ if (activeSO) return null;
           </div>
         )}
 
-        {/* SO List — virtual when > 100 items, normal otherwise */}
+        {/* ── SO List ─────────────────────────────────────────────── */}
         {!isLoading && !error && filteredList.length > 0 && (
           <>
-            <p className="text-sm text-gray-500 px-1 mb-3">
-              {filteredList.length} order
-              {filteredList.length !== 1 ? "s" : ""} pending
-            </p>
+            <div className="flex items-center justify-between px-1 mb-3">
+              <p className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
+                <Package2 className="w-4 h-4" aria-hidden="true" />
+                {filteredList.length} order{filteredList.length !== 1 ? "s" : ""} pending
+              </p>
+            </div>
 
             {useVirtual ? (
-              // ── Virtual list for large datasets ──────────────────
               <div
                 ref={parentRef}
-                className="overflow-auto"
-                style={{ height: "calc(100vh - 200px)" }}
+                className="overflow-auto hide-scrollbar"
+                style={{ height: "calc(100vh - 220px)" }}
               >
                 <div
                   style={{
@@ -179,10 +197,14 @@ if (activeSO) return null;
                 </div>
               </div>
             ) : (
-              // ── Normal list for small datasets ────────────────────
               <div className="space-y-3">
-                {filteredList.map((so) => (
-                  <SOCard key={so.so} so={so} />
+                {filteredList.map((so, i) => (
+                  <div
+                    key={so.so}
+                    style={{ "--stagger-delay": `${i * 50}ms` } as React.CSSProperties}
+                  >
+                    <SOCard so={so} />
+                  </div>
                 ))}
               </div>
             )}

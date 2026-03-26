@@ -1,4 +1,4 @@
-import { CheckCircle2, XCircle, Clock, Package } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Package, MapPin } from "lucide-react";
 import { LocationStatus } from "@/constants";
 import type { LocationGroup } from "@/types/picking";
 
@@ -10,84 +10,102 @@ interface LocationCardProps {
 
 const STATUS_CONFIG: Record<
   LocationStatus,
-  { icon: React.ReactNode; label: string; cardStyle: string; badgeStyle: string }
+  { icon: React.ReactNode; label: string; cardStyle: React.CSSProperties; badgeStyle: string; numberStyle: string }
 > = {
   [LocationStatus.PENDING]: {
-    icon: <Clock className="w-5 h-5 text-gray-400" aria-hidden="true" />,
+    icon: <Clock className="w-5 h-5 text-slate-400" aria-hidden="true" />,
     label: "Pending",
-    cardStyle: "border-gray-200 bg-white",
-    badgeStyle: "bg-gray-100 text-gray-600 border-gray-200",
+    cardStyle: { borderColor: "#e2e8f0", background: "#fff" },
+    badgeStyle: "badge badge-pending",
+    numberStyle: "bg-slate-100 text-slate-500",
   },
   [LocationStatus.PALLET_SCANNED]: {
     icon: <Package className="w-5 h-5 text-blue-500" aria-hidden="true" />,
     label: "In Progress",
-    cardStyle: "border-blue-300 bg-blue-50",
-    badgeStyle: "bg-blue-100 text-blue-700 border-blue-200",
+    cardStyle: { borderColor: "#bfdbfe", background: "#eff6ff" },
+    badgeStyle: "badge badge-progress",
+    numberStyle: "bg-blue-100 text-blue-700",
   },
   [LocationStatus.COMPLETED]: {
     icon: <CheckCircle2 className="w-5 h-5 text-green-500" aria-hidden="true" />,
     label: "Picked",
-    cardStyle: "border-green-200 bg-green-50",
-    badgeStyle: "bg-green-100 text-green-700 border-green-200",
+    cardStyle: { borderColor: "#bbf7d0", background: "#f0fdf4" },
+    badgeStyle: "badge badge-success",
+    numberStyle: "bg-green-100 text-green-700",
   },
   [LocationStatus.ERROR]: {
     icon: <XCircle className="w-5 h-5 text-red-500" aria-hidden="true" />,
     label: "Error",
-    cardStyle: "border-red-200 bg-red-50",
-    badgeStyle: "bg-red-100 text-red-700 border-red-200",
+    cardStyle: { borderColor: "#fecdd3", background: "#fff1f2" },
+    badgeStyle: "badge badge-error",
+    numberStyle: "bg-red-100 text-red-700",
   },
 };
 
 export function LocationCard({ location, index, isActive = false }: LocationCardProps) {
   const config = STATUS_CONFIG[location.status];
+  const isCompleted = location.status === LocationStatus.COMPLETED;
 
   return (
     <div
-      className={`rounded-xl border-2 p-4 transition-all duration-200
-                  ${config.cardStyle}
-                  ${isActive ? "ring-2 ring-blue-400 ring-offset-2 shadow-md" : ""}
+      className={`rounded-2xl border-2 p-4 transition-all duration-300
+                  ${isActive ? "ring-2 ring-blue-400 ring-offset-2" : ""}
                  `}
+      style={{
+        ...config.cardStyle,
+        boxShadow: isActive
+          ? "0 4px 20px rgba(37, 99, 235, 0.15), 0 2px 8px rgba(0,0,0,0.06)"
+          : "0 1px 4px rgba(0,0,0,0.05)",
+      }}
       aria-label={`Location ${location.location}, status: ${config.label}`}
     >
       <div className="flex items-start justify-between gap-3">
         {/* Left: location info */}
-        <div className="flex-1 min-w-0">
+        <div className={`flex-1 min-w-0 ${isCompleted ? "opacity-70" : ""}`}>
           {/* Index + Location name */}
-          <div className="flex items-center gap-2">
-            <span className="w-6 h-6 rounded-full bg-gray-200 text-gray-600 text-xs
-                             font-bold flex items-center justify-center shrink-0">
+          <div className="flex items-center gap-2.5">
+            <span
+              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0
+                           text-xs font-black ${config.numberStyle}`}
+            >
               {index + 1}
             </span>
-            <p className="text-base font-bold text-gray-900 truncate">
-              {location.location}
-            </p>
+            <div className="flex items-center gap-1.5 min-w-0 flex-1">
+              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" aria-hidden="true" />
+              <p className={`text-base font-black text-slate-900 truncate ${isCompleted ? "line-through text-slate-500" : ""}`}>
+                {location.location}
+              </p>
+            </div>
             {isActive && (
-              <span className="shrink-0 px-2 py-0.5 rounded-full bg-blue-600 text-white
-                               text-xs font-semibold">
+              <span
+                className="shrink-0 px-2.5 py-0.5 rounded-full
+                           text-xs font-bold text-white"
+                style={{ background: "linear-gradient(135deg, #2563eb, #1d4ed8)" }}
+              >
                 Active
               </span>
             )}
           </div>
 
           {/* SKU info */}
-          <div className="mt-2 pl-8 space-y-0.5">
-            <p className="text-sm font-semibold text-gray-700 truncate">
+          <div className="mt-2.5 pl-9 space-y-0.5">
+            <p className="text-sm font-semibold text-slate-700 truncate">
               {location.skuName}
             </p>
-            <p className="text-xs text-gray-400 font-mono">{location.sku}</p>
+            <p className="text-xs text-slate-400 font-mono tracking-wide">{location.sku}</p>
           </div>
 
-          {/* Quantity */}
-          <div className="mt-2.5 pl-8 flex items-center gap-4">
+          {/* Quantity + Tag */}
+          <div className="mt-3 pl-9 flex items-center gap-5">
             <div>
-              <span className="text-xs text-gray-400 uppercase tracking-wide">Qty</span>
-              <p className="text-lg font-black text-gray-900 leading-tight">
+              <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Qty</span>
+              <p className="text-2xl font-black text-slate-900 leading-tight tabular-nums">
                 {location.quantity}
               </p>
             </div>
             <div>
-              <span className="text-xs text-gray-400 uppercase tracking-wide">Tag</span>
-              <p className="text-sm font-mono font-semibold text-gray-700 leading-tight">
+              <span className="text-xs text-slate-400 uppercase tracking-widest font-semibold">Tag</span>
+              <p className="text-sm font-mono font-bold text-slate-700 leading-tight mt-0.5">
                 {location.tag}
               </p>
             </div>
@@ -95,11 +113,9 @@ export function LocationCard({ location, index, isActive = false }: LocationCard
         </div>
 
         {/* Right: status icon + badge */}
-        <div className="flex flex-col items-end gap-2 shrink-0">
+        <div className="flex flex-col items-end gap-2 shrink-0 pt-0.5">
           {config.icon}
-          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${config.badgeStyle}`}>
-            {config.label}
-          </span>
+          <span className={config.badgeStyle}>{config.label}</span>
         </div>
       </div>
     </div>

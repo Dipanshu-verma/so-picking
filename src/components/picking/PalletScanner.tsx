@@ -6,7 +6,6 @@ import { Scan, Camera, CameraOff, MapPin, Package } from "lucide-react";
 import { useBarcodeScanner } from "@/hooks/useBarcodeScanner";
 import type { LocationGroup } from "@/types/picking";
 
-// Dynamic import — html5-qrcode uses browser APIs, must be client-only
 const CameraScanner = dynamic(
   () =>
     import("@/components/picking/CameraScanner").then((m) => ({
@@ -15,8 +14,8 @@ const CameraScanner = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="h-48 bg-gray-100 rounded-xl animate-pulse flex items-center justify-center">
-        <p className="text-sm text-gray-400">Starting camera...</p>
+      <div className="h-48 rounded-2xl skeleton flex items-center justify-center">
+        <p className="text-sm text-slate-400 font-medium">Starting camera...</p>
       </div>
     ),
   }
@@ -57,17 +56,30 @@ export function PalletScanner({
 
   return (
     <div className="space-y-5">
-      {/* Location info card */}
-      <div className="warehouse-card bg-blue-50 border-2 border-blue-200">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
-            <MapPin className="w-5 h-5 text-white" aria-hidden="true" />
+      {/* ── Location info card ────────────────────────────────── */}
+      <div
+        className="rounded-2xl border-2 p-5"
+        style={{
+          borderColor: "#bfdbfe",
+          background: "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+          boxShadow: "0 4px 20px rgba(37,99,235,0.1)",
+        }}
+      >
+        <div className="flex items-start gap-4">
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
+            style={{
+              background: "linear-gradient(135deg, #2563eb, #1d4ed8)",
+              boxShadow: "0 4px 12px rgba(37,99,235,0.4)",
+            }}
+          >
+            <MapPin className="w-6 h-6 text-white" aria-hidden="true" />
           </div>
-          <div className="min-w-0">
-            <p className="text-xs text-blue-600 font-semibold uppercase tracking-wide">
+          <div className="min-w-0 flex-1">
+            <p className="text-xs text-blue-600 font-bold uppercase tracking-widest">
               Location {locationIndex + 1} of {totalLocations}
             </p>
-            <p className="text-2xl font-black text-gray-900 mt-0.5 truncate">
+            <p className="text-3xl font-black text-slate-900 mt-0.5 truncate tracking-tight">
               {location.location}
             </p>
           </div>
@@ -75,31 +87,37 @@ export function PalletScanner({
 
         {/* SKU hint */}
         <div className="mt-4 pt-4 border-t border-blue-200 flex items-center gap-3">
-          <Package className="w-4 h-4 text-blue-400 shrink-0" aria-hidden="true" />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-700 truncate">
-              {location.skuName}
-            </p>
-            <p className="text-xs font-mono text-gray-400">
-              {location.sku} · Qty: {location.quantity}
+          <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+            <Package className="w-4 h-4 text-blue-500" aria-hidden="true" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-slate-800 truncate">{location.skuName}</p>
+            <p className="text-xs font-mono text-slate-500 mt-0.5">
+              {location.sku} · <span className="font-bold">Qty: {location.quantity}</span>
             </p>
           </div>
         </div>
       </div>
 
-      {/* Scan instruction */}
+      {/* ── Scan instruction ─────────────────────────────────── */}
       <div className="text-center">
-        <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
-          <Scan className="w-8 h-8 text-gray-500" aria-hidden="true" />
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 scan-pulse"
+          style={{
+            background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)",
+            border: "2px solid #e2e8f0",
+          }}
+        >
+          <Scan className="w-8 h-8 text-slate-500" aria-hidden="true" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Scan Pallet</h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <h2 className="text-xl font-black text-slate-900">Scan Pallet Barcode</h2>
+        <p className="text-sm text-slate-500 mt-1">
           Scan the pallet barcode at{" "}
-          <strong className="text-gray-700">{location.location}</strong>
+          <strong className="text-slate-800 font-bold">{location.location}</strong>
         </p>
       </div>
 
-      {/* Camera scanner (lazy loaded) */}
+      {/* ── Camera scanner ───────────────────────────────────── */}
       {cameraOpen && (
         <CameraScanner
           onScan={(value) => {
@@ -110,7 +128,7 @@ export function PalletScanner({
         />
       )}
 
-      {/* Keyboard / hardware scanner input */}
+      {/* ── Keyboard / hardware scanner input ─────────────────── */}
       {!cameraOpen && (
         <form onSubmit={handleManualSubmit} className="space-y-3">
           <input
@@ -127,19 +145,22 @@ export function PalletScanner({
             className="scan-input"
           />
           {inputValue.trim().length >= 3 && (
-            <button type="submit" className="warehouse-button-primary w-full">
+            <button
+              type="submit"
+              className="warehouse-button warehouse-button-primary w-full"
+            >
               Confirm Barcode
             </button>
           )}
         </form>
       )}
 
-      {/* Camera toggle */}
+      {/* ── Camera toggle ─────────────────────────────────────── */}
       <button
         type="button"
         onClick={() => setCameraOpen((v) => !v)}
         aria-label={cameraOpen ? "Close camera scanner" : "Open camera scanner"}
-        className="warehouse-button-secondary w-full flex items-center justify-center gap-2"
+        className="warehouse-button warehouse-button-secondary w-full flex items-center justify-center gap-2"
       >
         {cameraOpen ? (
           <>

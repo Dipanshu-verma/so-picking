@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import { RefreshCw, CheckCircle2, AlertCircle, CloudOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { processSyncQueue } from "@/lib/sync-manager";
 import { useAppStore } from "@/store/app-store";
@@ -50,7 +50,8 @@ export function SyncButton({ pendingCount = 0, onSyncComplete }: SyncButtonProps
       <div
         aria-label="All synced"
         className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                   bg-green-100 text-green-700 text-xs font-semibold"
+                   text-xs font-bold text-green-700 border border-green-200"
+        style={{ background: "linear-gradient(135deg, #f0fdf4, #dcfce7)" }}
       >
         <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
         Synced
@@ -63,10 +64,10 @@ export function SyncButton({ pendingCount = 0, onSyncComplete }: SyncButtonProps
       onClick={handleSync}
       disabled={isSyncing || !isOnline}
       aria-label={`Sync ${pendingCount} pending item(s)`}
-      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold
-                 transition-all duration-150
-                 bg-amber-100 text-amber-700 hover:bg-amber-200
-                 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold
+                 transition-all duration-150 border border-amber-200
+                 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+      style={{ background: "linear-gradient(135deg, #fffbeb, #fef3c7)", color: "#92400e" }}
     >
       {isSyncing ? (
         <>
@@ -75,7 +76,11 @@ export function SyncButton({ pendingCount = 0, onSyncComplete }: SyncButtonProps
         </>
       ) : (
         <>
-          <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
+          {isOnline ? (
+            <AlertCircle className="w-3.5 h-3.5" aria-hidden="true" />
+          ) : (
+            <CloudOff className="w-3.5 h-3.5" aria-hidden="true" />
+          )}
           Sync ({pendingCount})
         </>
       )}

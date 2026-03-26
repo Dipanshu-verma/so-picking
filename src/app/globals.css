@@ -1,8 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
   --color-brand-500: #3b82f6;
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
@@ -10,6 +12,7 @@
 
   --color-success-50: #f0fdf4;
   --color-success-100: #dcfce7;
+  --color-success-200: #bbf7d0;
   --color-success-500: #22c55e;
   --color-success-600: #16a34a;
   --color-success-700: #15803d;
@@ -25,7 +28,7 @@
   --color-warning-500: #f59e0b;
   --color-warning-600: #d97706;
 
-  --color-warehouse-bg: #f8fafc;
+  --color-warehouse-bg: #f1f5f9;
   --color-warehouse-card: #ffffff;
   --color-warehouse-border: #e2e8f0;
   --color-warehouse-text: #0f172a;
@@ -36,23 +39,88 @@
   --radius-lg: var(--radius);
   --radius: 0.75rem;
 
-  --animate-fade-in: fadeIn 0.2s ease-in-out;
-  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-fade-in: fadeIn 0.25s ease-out;
+  --animate-slide-up: slideUp 0.35s ease-out;
   --animate-scan-line: scanLine 1.5s ease-in-out infinite;
+  --animate-pulse-ring: pulseRing 2s ease-in-out infinite;
+  --animate-shimmer: shimmer 1.8s ease-in-out infinite;
+  --animate-bounce-in: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-shake: shake 0.4s ease-in-out;
+  --animate-flash-green: flashGreen 0.5s ease-out;
+  --animate-flash-red: flashRed 0.5s ease-out;
+  --animate-count-up: countUp 0.3s ease-out;
+  --animate-slide-down-in: slideDownIn 0.3s ease-out;
 
   @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 
   @keyframes slideUp {
-    0% { transform: translateY(20px); opacity: 0; }
+    0% { transform: translateY(24px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slideDownIn {
+    0% { transform: translateY(-12px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }
   }
 
   @keyframes scanLine {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(100%); }
+  }
+
+  @keyframes pulseRing {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4); }
+    50% { box-shadow: 0 0 0 10px rgba(37, 99, 235, 0); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    60% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(6px); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+    90% { transform: translateX(3px); }
+  }
+
+  @keyframes flashGreen {
+    0% { background-color: transparent; }
+    30% { background-color: rgba(22, 163, 74, 0.15); transform: scale(1.01); }
+    100% { background-color: transparent; transform: scale(1); }
+  }
+
+  @keyframes flashRed {
+    0% { background-color: transparent; }
+    30% { background-color: rgba(220, 38, 38, 0.12); }
+    100% { background-color: transparent; }
+  }
+
+  @keyframes countUp {
+    0% { transform: translateY(8px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes dot-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
   }
 }
 
@@ -61,12 +129,18 @@
     box-sizing: border-box;
   }
 
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     background-color: var(--color-warehouse-bg);
     color: var(--color-warehouse-text);
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
   }
 
   /* Minimum touch targets for warehouse workers with gloves */
@@ -82,100 +156,269 @@
 }
 
 @layer components {
+  /* ── Core Button System ───────────────────────────────────────── */
   .warehouse-button {
     min-height: 56px;
-    font-size: 1.125rem;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    padding: 0.75rem 1.5rem;
-    transition: all 150ms;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    border-radius: 0.875rem;
+    padding: 0.875rem 1.75rem;
+    transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    letter-spacing: 0.01em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .warehouse-button::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0);
+    transition: background 180ms;
+    border-radius: inherit;
+  }
+
+  .warehouse-button:hover::after {
+    background: rgba(255,255,255,0.08);
   }
 
   .warehouse-button:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 
-  .warehouse-button:focus {
+  .warehouse-button:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-brand-500);
+    box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--color-brand-500);
   }
 
   .warehouse-button-primary {
-    background-color: var(--color-brand-600);
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #fff;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35), 0 1px 3px rgba(0,0,0,0.1);
   }
 
   .warehouse-button-primary:hover {
-    background-color: var(--color-brand-700);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45), 0 2px 6px rgba(0,0,0,0.12);
+    transform: translateY(-1px);
+  }
+
+  .warehouse-button-primary:active {
+    transform: scale(0.96) translateY(0);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
   }
 
   .warehouse-button-success {
-    background-color: var(--color-success-600);
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
     color: #fff;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35), 0 1px 3px rgba(0,0,0,0.1);
   }
 
   .warehouse-button-success:hover {
-    background-color: var(--color-success-700);
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .warehouse-button-success:active {
+    transform: scale(0.96) translateY(0);
   }
 
   .warehouse-button-danger {
-    background-color: var(--color-danger-600);
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
     color: #fff;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35), 0 1px 3px rgba(0,0,0,0.1);
   }
 
   .warehouse-button-danger:hover {
-    background-color: var(--color-danger-700);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .warehouse-button-danger:active {
+    transform: scale(0.96) translateY(0);
   }
 
   .warehouse-button-secondary {
     background-color: #fff;
     color: #374151;
     border: 2px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   }
 
   .warehouse-button-secondary:hover {
     background-color: #f9fafb;
+    border-color: #d1d5db;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   }
 
-  .warehouse-button:disabled {
-    opacity: 0.5;
+  .warehouse-button:disabled,
+  .warehouse-button-primary:disabled,
+  .warehouse-button-success:disabled,
+  .warehouse-button-danger:disabled,
+  .warehouse-button-secondary:disabled {
+    opacity: 0.45;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
+    box-shadow: none !important;
   }
 
+  /* ── Card System ─────────────────────────────────────────────── */
   .warehouse-card {
     background-color: #fff;
-    border-radius: 1rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    border: 1px solid var(--color-warehouse-border);
-    padding: 1rem;
+    border-radius: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 1.125rem;
+    transition: box-shadow 200ms ease, transform 200ms ease;
   }
 
+  .warehouse-card-hover:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+  }
+
+  /* ── Scan Input ──────────────────────────────────────────────── */
   .scan-input {
     width: 100%;
     font-size: 1.25rem;
-    font-family: monospace;
+    font-family: 'Inter', monospace;
     text-align: center;
     letter-spacing: 0.1em;
-    border: 2px solid var(--color-brand-300, #93c5fd);
-    border-radius: 0.75rem;
-    padding: 1rem;
+    font-weight: 600;
+    border: 2.5px solid #bfdbfe;
+    border-radius: 1rem;
+    padding: 1.125rem 1rem;
     outline: none;
     background: #fff;
     color: var(--color-warehouse-text);
+    transition: all 200ms ease;
+    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
   }
 
   .scan-input:focus {
     border-color: var(--color-brand-500);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12), 0 1px 4px rgba(0,0,0,0.06);
   }
 
   .scan-input::placeholder {
-    color: #9ca3af;
+    color: #94a3b8;
+    font-weight: 400;
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  /* ── Status Badges ───────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+    border: 1px solid transparent;
+  }
+
+  .badge-pending {
+    background: #f1f5f9;
+    color: #475569;
+    border-color: #cbd5e1;
+  }
+
+  .badge-progress {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+  }
+
+  .badge-success {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
+  }
+
+  .badge-error {
+    background: #ffe4e6;
+    color: #b91c1c;
+    border-color: #fecdd3;
+  }
+
+  .badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+    border-color: #fde68a;
+  }
+
+  /* ── Progress Bar ────────────────────────────────────────────── */
+  .progress-track {
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #2563eb 0%, #60a5fa 100%);
+    transition: width 400ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: shimmer 2s ease-in-out infinite;
+    background-size: 200% 100%;
+  }
+
+  /* ── Shimmer Skeleton ────────────────────────────────────────── */
+  .skeleton {
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s ease-in-out infinite;
+    border-radius: 0.5rem;
+  }
+
+  /* ── Scan Pulse Border ───────────────────────────────────────── */
+  .scan-pulse {
+    animation: pulseRing 2s ease-in-out infinite;
+  }
+
+  /* ── Stagger animation helpers ───────────────────────────────── */
+  .fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .slide-up {
+    animation: slideUp 0.35s ease-out forwards;
+  }
+
+  .bounce-in {
+    animation: bounceIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  /* ── Online dot ──────────────────────────────────────────────── */
+  .online-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #16a34a;
+    animation: dot-pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.3);
+  }
+
+  .offline-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #dc2626;
   }
 }
 
@@ -184,4 +427,20 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+}
+
+/* Stagger delays for list items */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+
+/* Utility: hide scrollbar but allow scroll */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
