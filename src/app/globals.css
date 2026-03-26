@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-900: #1e3a8a;
+
+  --color-success-50: #f0fdf4;
+  --color-success-100: #dcfce7;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  --color-danger-50: #fff1f2;
+  --color-danger-100: #ffe4e6;
+  --color-danger-500: #ef4444;
+  --color-danger-600: #dc2626;
+  --color-danger-700: #b91c1c;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+
+  --color-warehouse-bg: #f8fafc;
+  --color-warehouse-card: #ffffff;
+  --color-warehouse-border: #e2e8f0;
+  --color-warehouse-text: #0f172a;
+  --color-warehouse-muted: #64748b;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius: 0.75rem;
+
+  --animate-fade-in: fadeIn 0.2s ease-in-out;
+  --animate-slide-up: slideUp 0.3s ease-out;
+  --animate-scan-line: scanLine 1.5s ease-in-out infinite;
+
+  @keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes scanLine {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(100%); }
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--color-warehouse-bg);
+    color: var(--color-warehouse-text);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Minimum touch targets for warehouse workers with gloves */
+  button, [role="button"] {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+@layer components {
+  .warehouse-button {
+    min-height: 56px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 150ms;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .warehouse-button:active {
+    transform: scale(0.95);
+  }
+
+  .warehouse-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--color-brand-500);
+  }
+
+  .warehouse-button-primary {
+    background-color: var(--color-brand-600);
+    color: #fff;
+  }
+
+  .warehouse-button-primary:hover {
+    background-color: var(--color-brand-700);
+  }
+
+  .warehouse-button-success {
+    background-color: var(--color-success-600);
+    color: #fff;
+  }
+
+  .warehouse-button-success:hover {
+    background-color: var(--color-success-700);
+  }
+
+  .warehouse-button-danger {
+    background-color: var(--color-danger-600);
+    color: #fff;
+  }
+
+  .warehouse-button-danger:hover {
+    background-color: var(--color-danger-700);
+  }
+
+  .warehouse-button-secondary {
+    background-color: #fff;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+  }
+
+  .warehouse-button-secondary:hover {
+    background-color: #f9fafb;
+  }
+
+  .warehouse-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .warehouse-card {
+    background-color: #fff;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid var(--color-warehouse-border);
+    padding: 1rem;
+  }
+
+  .scan-input {
+    width: 100%;
+    font-size: 1.25rem;
+    font-family: monospace;
+    text-align: center;
+    letter-spacing: 0.1em;
+    border: 2px solid var(--color-brand-300, #93c5fd);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    outline: none;
+    background: #fff;
+    color: var(--color-warehouse-text);
+  }
+
+  .scan-input:focus {
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  .scan-input::placeholder {
+    color: #9ca3af;
+  }
+}
+
+/* PWA safe area */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
