@@ -20,6 +20,7 @@ export interface ActiveSO {
   soId: string;
   date: string;
   scanSku: boolean;
+   rowIndex: number;  
   locations: LocationGroup[];
   totalLocations: number;
   completedLocations: number;

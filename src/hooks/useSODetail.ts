@@ -221,6 +221,7 @@ if (
         soId,
         date: soRow.date,
         scanSku: soRow.scanSku,
+        rowIndex: soRow.rowIndex,
         locations,
         totalLocations: totalCount,
         completedLocations: completedCount,

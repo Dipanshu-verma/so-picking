@@ -103,15 +103,19 @@ const errorCount = errors.length;
   }, [soId, clearErrors, clearActiveSO]);
 
   // ── Get SO row index from cached list ──────────────────────────────
-  const getSORowIndex = useCallback(async (): Promise<number | null> => {
-    try {
-      const cached = await soListDB.get();
-      const row = cached?.data.find((s) => s.so === soId);
-      return row?.rowIndex ?? null;
-    } catch {
-      return null;
-    }
-  }, [soId]);
+const getSORowIndex = useCallback(async (): Promise<number | null> => {
+  // First try from activeSO store — most reliable, set at picking start
+  if (activeSO?.rowIndex) return activeSO.rowIndex;
+
+  // Fallback to IndexedDB cache
+  try {
+    const cached = await soListDB.get();
+    const row = cached?.data.find((s) => s.so === soId);
+    return row?.rowIndex ?? null;
+  } catch {
+    return null;
+  }
+}, [soId, activeSO]);
 
   // ── Main submit handler ────────────────────────────────────────────
   const handleSubmit = useCallback(async () => {
