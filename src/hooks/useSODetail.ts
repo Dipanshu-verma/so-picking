@@ -143,9 +143,9 @@ if (
 // This handles the case where sheet is manually reset
 if (
   foundSORow &&
-  foundSORow.status !== "IN_PROGRESS" &&
-  foundSORow.status !== "COMPLETED" &&
-  foundSORow.status !== "COMPLETED_WITH_ERRORS"
+  (foundSORow.status as SOStatus) !== SOStatus.IN_PROGRESS &&
+  (foundSORow.status as SOStatus) !== SOStatus.COMPLETED &&
+  (foundSORow.status as SOStatus) !== SOStatus.COMPLETED_WITH_ERRORS
 ) {
   await Promise.allSettled([
     pickingProgressDB.clear(soId),
